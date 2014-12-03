@@ -4,6 +4,7 @@ package com.seg2.kcl2d;
 import android.app.Activity;
 import android.app.ActionBar;
 import android.app.Fragment;
+import android.graphics.Color;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -11,15 +12,19 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.SearchView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -30,7 +35,7 @@ import java.util.List;
  * See the <a href="https://developer.android.com/design/patterns/navigation-drawer.html#Interaction">
  * design guidelines</a> for a complete explanation of the behaviors implemented here.
  */
-public class NavigationDrawerFragment extends Fragment {
+public class NavigationDrawerFragment extends Fragment implements SearchView.OnQueryTextListener{
 
 
     private static final List<String> countryList = new ArrayList<String>();
@@ -59,6 +64,7 @@ public class NavigationDrawerFragment extends Fragment {
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerListView;
     private View mFragmentContainerView;
+    private SearchView sv;
 
     private int mCurrentSelectedPosition = 0;
     private boolean mFromSavedInstanceState;
@@ -126,13 +132,33 @@ public class NavigationDrawerFragment extends Fragment {
                 android.R.id.text1,
                 CountryData.countries));
 
+        mDrawerListView.setTextFilterEnabled(true);
         mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
+
 
         return mDrawerListView;
     }
 
     public boolean isDrawerOpen() {
         return mDrawerLayout != null && mDrawerLayout.isDrawerOpen(mFragmentContainerView);
+    }
+
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        if(isDrawerOpen()) {
+            MenuItem item = menu.add("Search");
+            item.setIcon(android.R.drawable.ic_menu_search);
+            item.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+            sv = new SearchView(getActivity());
+            item.setActionView(sv);
+
+            int id = sv.getContext().getResources().getIdentifier("android:id/search_src_text", null, null);
+            sv.setQueryHint("Search Countries");
+            sv.setOnQueryTextListener(this);
+            sv.setIconifiedByDefault(true);
+            TextView textView = (TextView) sv.findViewById(id);
+            textView.setTextColor(Color.WHITE);
+        }
     }
 
     /**
@@ -148,6 +174,8 @@ public class NavigationDrawerFragment extends Fragment {
         // set a custom shadow that overlays the main content when the drawer opens
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
         // set up the drawer's list view with items and click listener
+
+
 
         ActionBar actionBar = getActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
@@ -169,6 +197,14 @@ public class NavigationDrawerFragment extends Fragment {
                     return;
                 }
 
+                InputMethodManager inputMethodManager = (InputMethodManager) getActivity()
+                        .getSystemService(Activity.INPUT_METHOD_SERVICE);
+                inputMethodManager.hideSoftInputFromWindow(
+                        getActivity().getCurrentFocus().getWindowToken(),
+                        0
+                );
+
+                mDrawerListView.clearTextFilter();
                 getActivity().invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
             }
 
@@ -191,6 +227,8 @@ public class NavigationDrawerFragment extends Fragment {
                 getActivity().invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
             }
         };
+
+
 
         // If the user hasn't 'learned' about the drawer, open it to introduce them to the drawer,
         // per the navigation drawer design guidelines.
@@ -268,10 +306,10 @@ public class NavigationDrawerFragment extends Fragment {
             return true;
         }
 
-        if (item.getItemId() == R.id.action_example) {
+        /*if (item.getItemId() == R.id.action_example) {
             Toast.makeText(getActivity(), "Example action.", Toast.LENGTH_SHORT).show();
             return true;
-        }
+        }*/
 
         return super.onOptionsItemSelected(item);
     }
@@ -283,12 +321,28 @@ public class NavigationDrawerFragment extends Fragment {
     private void showGlobalContextActionBar() {
         ActionBar actionBar = getActionBar();
         actionBar.setDisplayShowTitleEnabled(true);
+        actionBar.setTitle("Countries");
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-        actionBar.setTitle(R.string.app_name);
+        //actionBar.setTitle(R.string.app_name);
     }
 
     private ActionBar getActionBar() {
         return getActivity().getActionBar();
+    }
+
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        return false;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String newText) {
+        if (TextUtils.isEmpty(newText)) {
+            mDrawerListView.clearTextFilter();
+        } else {
+            mDrawerListView.setFilterText(newText.toString());
+        }
+        return true;
     }
 
     /**
