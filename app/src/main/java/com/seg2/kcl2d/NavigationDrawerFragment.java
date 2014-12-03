@@ -67,6 +67,7 @@ public class NavigationDrawerFragment extends Fragment implements SearchView.OnQ
     private SearchView sv;
 
     private int mCurrentSelectedPosition = 0;
+    private int searchViews;
     private boolean mFromSavedInstanceState;
     private boolean mUserLearnedDrawer;
 
@@ -145,7 +146,7 @@ public class NavigationDrawerFragment extends Fragment implements SearchView.OnQ
 
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
-        if(isDrawerOpen()) {
+        if(isDrawerOpen() && searchViews == 0) {
             MenuItem item = menu.add("Search");
             item.setIcon(android.R.drawable.ic_menu_search);
             item.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
@@ -157,7 +158,10 @@ public class NavigationDrawerFragment extends Fragment implements SearchView.OnQ
             sv.setOnQueryTextListener(this);
             sv.setIconifiedByDefault(true);
             TextView textView = (TextView) sv.findViewById(id);
-            textView.setTextColor(Color.WHITE);
+            //textView.setTextColor(Color.WHITE);
+            if(searchViews == 0){
+                searchViews++;
+            }
         }
     }
 
@@ -205,6 +209,7 @@ public class NavigationDrawerFragment extends Fragment implements SearchView.OnQ
                 );
 
                 mDrawerListView.clearTextFilter();
+                searchViews = 0;
                 getActivity().invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
             }
 
