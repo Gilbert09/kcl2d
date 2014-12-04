@@ -5,7 +5,7 @@ import com.seg2.kcl2d.Country;
 /**
  * Created by Thomas on 2/12/2014.
  */
-public class Population {
+public class IndicatorClass {
 
     private Indicator indicator;
     private Country country;

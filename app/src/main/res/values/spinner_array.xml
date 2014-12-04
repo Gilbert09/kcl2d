@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="spinner_array">
-        <item>dummy1</item>
-        <item>dummy2</item>
-        <item>dummy3</item>
+        <item>SP.DYN.LE00.MA.IN</item>
+        <item>EN.ATM.CO2E.PC</item>
     </string-array>
 </resources>

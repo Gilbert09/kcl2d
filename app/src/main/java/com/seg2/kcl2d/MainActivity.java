@@ -5,13 +5,10 @@ import android.app.Activity;
 import android.app.ActionBar;
 import android.app.Fragment;
 import android.app.FragmentManager;
-import android.content.Context;
 import android.graphics.Color;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -21,12 +18,11 @@ import android.support.v4.widget.DrawerLayout;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.SpinnerAdapter;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.seg2.kcl2d.json.Population;
+import com.seg2.kcl2d.json.IndicatorClass;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -49,6 +45,7 @@ import lecho.lib.hellocharts.model.Axis;
 import lecho.lib.hellocharts.model.Line;
 import lecho.lib.hellocharts.model.LineChartData;
 import lecho.lib.hellocharts.model.PointValue;
+import lecho.lib.hellocharts.model.SimpleValueFormatter;
 import lecho.lib.hellocharts.view.LineChartView;
 
 
@@ -75,7 +72,18 @@ public class MainActivity extends Activity
      */
     private LineChartView chart;
 
-    Population[] population = null;
+
+    String indicatorString = null;
+
+    IndicatorClass[] population = null;
+    static float popMax;
+    static float popMin;
+
+    IndicatorClass[] indicator = null;
+    static float indicatorMax;
+    static float indicatorMin;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,7 +103,9 @@ public class MainActivity extends Activity
 
             @Override
             public boolean onNavigationItemSelected(int itemPosition, long itemId) {
+                indicatorString = strings[itemPosition];
                 Toast.makeText(getBaseContext(), "You selected : " + strings[itemPosition], Toast.LENGTH_SHORT).show();
+                new DownloadJson().execute();
                 return false;
             }
         };
@@ -218,9 +228,10 @@ public class MainActivity extends Activity
         }
     }
 
+    /*
     public void setUpGraph() {
         chart = (LineChartView) findViewById(R.id.country_detail);
-        chart.setValueSelectionEnabled(true);
+        //chart.setValueSelectionEnabled(true);
         LineChartData data = new LineChartData();
 
         data.setAxisXBottom(new Axis());
@@ -229,7 +240,7 @@ public class MainActivity extends Activity
         List<PointValue> values = new ArrayList<PointValue>();
 
         for (int i = 0; i < population.length; i++) {
-            Population populationData = population[i];
+            Indicator populationData = population[i];
             int populationYear = Integer.parseInt(populationData.getDate());
             int populationValue = Integer.parseInt(populationData.getValue());
 
@@ -245,17 +256,116 @@ public class MainActivity extends Activity
 
         chart.setLineChartData(data);
     }
+    */
 
-    private class DownloadJson extends AsyncTask<JSONArray, String, JSONArray> {
+    private void setUpGraph() {
+        LineChartView chart = (LineChartView) findViewById(R.id.country_detail);
+        LineChartData data;
+
+        Line line;
+        List<PointValue> values;
+        List<Line> lines = new ArrayList<Line>();
+
+        values = new ArrayList<PointValue>();
+        for (int i = 0; i < population.length; i++) {
+            String populationValue = population[i].getValue();
+            String populationYear = population[i].getDate();
+
+            float populationValueFloat = Float.parseFloat(populationValue);
+            float populationYearFloat = Float.parseFloat(populationYear);
+
+
+            float scalePopulation = GraphHelper.scaleValues(indicatorMax, indicatorMin, popMax, popMin, populationValueFloat);
+
+            values.add(new PointValue(populationYearFloat, scalePopulation));
+
+
+        }
+
+        line = new Line(values);
+        line.setColor(Color.RED);
+        line.setHasPoints(false);
+        lines.add(line);
+
+
+
+        values = new ArrayList<PointValue>();
+        for (int i = 0; i < indicator.length; i++) {
+            //Log.i("health.i", i + "");
+
+            if(indicator[i].getValue() != null) {
+                float healthValue = Float.parseFloat(indicator[i].getValue());
+                float healthYear = Float.parseFloat(indicator[i].getDate());
+
+
+
+                values.add(new PointValue(healthYear, healthValue));
+            }
+        }
+
+        //values.add(new PointValue(1960f, 0f));
+        line = new Line(values);
+        line.setColor(Color.BLUE);
+        lines.add(line);
+
+        data = new LineChartData(lines);
+
+
+        Axis yearAxis = new Axis();
+        yearAxis.setName("Year");
+        yearAxis.setMaxLabelChars(4);
+        yearAxis.setFormatter(new SimpleValueFormatter(0, false, null, null));
+        yearAxis.setHasLines(true);
+        data.setAxisXBottom(yearAxis);
+
+
+        data.setAxisYLeft(new Axis().setName("Percentage of Health Expenditure").setHasLines(true).setTextColor(Color.BLUE));
+        data.setAxisYRight(new Axis().setName("Population").setTextColor(Color.RED)
+                .setFormatter(new HeightValueFormatter(0, null, null)));
+
+
+        chart.setLineChartData(data);
+
+    /*
+        Viewport v = chart.getMaximumViewport();
+        v.set(v.left, healthPercentRange, v.right, 0);
+        chart.setMaximumViewport(v);
+        chart.setCurrentViewport(v, false);
+        */
+
+    }
+
+    private static class HeightValueFormatter extends SimpleValueFormatter {
+
+        public HeightValueFormatter(int digits, char[] prependedText, char[] apendedText) {
+            super(digits, true, prependedText, apendedText);
+        }
 
         @Override
-        protected JSONArray doInBackground(JSONArray... strings) {
+        public int formatAutoValue(char[] formattedValue, float[] values, int digits) {
+
+            int index = values.length - 1;
+            values[index] = GraphHelper.scaleValues(popMax, popMin, indicatorMax, indicatorMin, values[index]);
+
+            return super.formatAutoValue(formattedValue, values, digits);
+        }
+
+
+    }
+
+
+
+
+    private class DownloadJson extends AsyncTask<JSONArray, String, String[]> {
+
+        @Override
+        protected String[] doInBackground(JSONArray... strings) {
             String url;
             JSONArray jsonArray = null;
 
             StringBuilder builder = new StringBuilder();
 
-            url = "http://api.worldbank.org/countries/"+ mCountry.getId() +"/indicators/SP.POP.TOTL?date=1980:2000&format=json";
+            url = "http://api.worldbank.org/countries/"+ mCountry.getId() +"/indicators/SP.POP.TOTL?date=1960:2009&format=json";
 
             HttpClient client = new DefaultHttpClient();
             HttpGet httpGet = new HttpGet(url);
@@ -287,24 +397,80 @@ public class MainActivity extends Activity
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            return jsonArray;
+
+            String indicatorUrl;
+            JSONArray jsonArrayIndicator = null;
+
+            StringBuilder builderIndicator = new StringBuilder();
+
+            url = "http://api.worldbank.org/countries/"+ mCountry.getId() +"/indicators/"+ indicatorString +"?date=1960:2009&format=json";
+
+            HttpClient clientIndicator = new DefaultHttpClient();
+            HttpGet httpGetIndicator = new HttpGet(url);
+
+            try {
+                HttpResponse responseIndicator = clientIndicator.execute(httpGetIndicator);
+                StatusLine statusLineIndicator = responseIndicator.getStatusLine();
+                int statusCodeIndicator = statusLineIndicator.getStatusCode();
+
+                if(statusCodeIndicator == 200) {
+                    HttpEntity entityIndicator = responseIndicator.getEntity();
+                    InputStream contentIndicator = entityIndicator.getContent();
+                    BufferedReader readerIndicator = new BufferedReader(new InputStreamReader(contentIndicator));
+                    String lineIndicator;
+                    while ((lineIndicator = readerIndicator.readLine()) != null) {
+                        builderIndicator.append(lineIndicator);
+                    }
+                } else {
+                    Log.e("DATA JSON ERROR", "Failed to download file");
+                }
+            } catch (ClientProtocolException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            try {
+                jsonArrayIndicator = new JSONArray(builderIndicator.toString());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+
+
+            return new String[]{jsonArray.toString(), jsonArrayIndicator.toString()};
         }
 
         @Override
-        protected void onPostExecute(JSONArray jsonArray) {
+        protected void onPostExecute(String[] strings) {
 
-            //We can now access the data direct from the Population object.
-            //The Population[] array object contains each year, so we can
+            //We can now access the data direct from the Indicator object.
+            //The Indicator[] array object contains each year, so we can
             //easily manipulate the data and use it in the graphs.
 
-            try {
-                JSONArray countries = jsonArray.getJSONArray(1);
+            String populationCountriesString = strings[0];
+            String indicatorCountriesString = strings[1];
 
+            try {
+                JSONArray populationCountries = new JSONArray(populationCountriesString).getJSONArray(1);
                 Gson gson = new GsonBuilder().create();
-                population = gson.fromJson(countries.toString(), Population[].class);
+                population = gson.fromJson(populationCountries.toString(), IndicatorClass[].class);
+
+                float[] populationMinMax = GraphHelper.getRangeMaxMin(populationCountries);
+                popMin = populationMinMax[0];
+                popMax = populationMinMax[1];
+
+
+                JSONArray indicatorCountries = new JSONArray(indicatorCountriesString).getJSONArray(1);
+                Gson gsonIndicator = new GsonBuilder().create();
+                indicator = gsonIndicator.fromJson(indicatorCountries.toString(), IndicatorClass[].class);
+
+                float[] indicatorMinMax = GraphHelper.getRangeMaxMin(indicatorCountries);
+                indicatorMin = indicatorMinMax[0];
+                indicatorMax = indicatorMinMax[1];
 
                 // TextView tv = (TextView) rootView.findViewById(R.id.country_detail);
-                //tv.setText(population[0].getValue());
+                //tv.setText(indicator[0].getValue());
 
                 setUpGraph();
 
