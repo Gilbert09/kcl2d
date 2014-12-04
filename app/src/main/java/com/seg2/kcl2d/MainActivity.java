@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.app.ActionBar;
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.app.ProgressDialog;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -358,6 +359,19 @@ public class MainActivity extends Activity
 
     private class DownloadJson extends AsyncTask<JSONArray, String, String[]> {
 
+        ProgressDialog progressDialog;
+
+        private DownloadJson() {
+            progressDialog = new ProgressDialog(MainActivity.this);
+        }
+
+        @Override
+        protected void onPreExecute() {
+            progressDialog.setMessage("Getting Data");
+            progressDialog.show();
+        }
+
+
         @Override
         protected String[] doInBackground(JSONArray... strings) {
             String url;
@@ -447,6 +461,10 @@ public class MainActivity extends Activity
             //We can now access the data direct from the Indicator object.
             //The Indicator[] array object contains each year, so we can
             //easily manipulate the data and use it in the graphs.
+
+            if (progressDialog.isShowing()) {
+                progressDialog.dismiss();
+            }
 
             String populationCountriesString = strings[0];
             String indicatorCountriesString = strings[1];
