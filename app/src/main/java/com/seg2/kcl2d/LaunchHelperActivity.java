@@ -11,16 +11,16 @@ public class LaunchHelperActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        SharedPreferences sharedPreferences = this.getSharedPreferences("sharedPreferences", MODE_PRIVATE);
 
+        SharedPreferences sharedPreferences = this.getSharedPreferences("sharedPreferences", MODE_PRIVATE);
         boolean shouldHideHomeScreen = sharedPreferences.getBoolean("shouldHideHomeScreen", false);
 
         if (shouldHideHomeScreen) {
-            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(new Intent(this, MainActivity.class));
         } else {
-            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(new Intent(this, HomeScreenActivity.class));
         }
+
+        finish();
     }
 }
