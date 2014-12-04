@@ -6,9 +6,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-/**
- * Created by Harry on 03/12/2014.
- */
 public class GraphHelper {
 
     public static float[] getRangeMaxMin(JSONArray jsonArray) {
@@ -21,7 +18,11 @@ public class GraphHelper {
             JSONObject jsonObject = (JSONObject) jsonArray.get(0);
             Log.i("ff", jsonObject.toString());
 
-            if(jsonObject.getString("value") != null) {
+            if(jsonObject.isNull("value")) {
+                Log.i("isNull", "isNull");
+            }
+
+            if(!jsonObject.isNull("value")) {
                 min = Double.parseDouble(jsonObject.getString("value"));
                 max = min;
             }
@@ -29,9 +30,10 @@ public class GraphHelper {
             for(int i = 1; i < jsonArray.length(); i++) {
                 jsonObject = (JSONObject) jsonArray.get(i);
 
-                String tempValue = jsonObject.getString("value");
 
-                if(!tempValue.equals("null")) {
+
+                if(!jsonObject.isNull("value")) {
+                    String tempValue = jsonObject.getString("value");
                     tempValueFloat = Double.parseDouble(tempValue);
                     if (tempValueFloat < min) {
                         min = tempValueFloat;
