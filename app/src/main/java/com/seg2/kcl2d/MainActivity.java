@@ -6,7 +6,12 @@ import android.app.ActionBar;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -160,6 +165,17 @@ public class MainActivity extends Activity
         actionBar.setTitle(mTitle);
     }
 
+    @Override
+    protected void onResume() {
+        registerReceiver(mConnReceiver,new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        unregisterReceiver(mConnReceiver);
+        super.onPause();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -497,4 +513,20 @@ public class MainActivity extends Activity
             }
         }
     }
+
+    private BroadcastReceiver mConnReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            boolean noConnectivity = intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false);
+
+            if(noConnectivity){
+                Toast.makeText(context, "No connection", Toast.LENGTH_LONG).show();
+                finish();
+            }
+        }
+    };
+
+
+
+
 }
