@@ -14,6 +14,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -47,7 +48,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import lecho.lib.hellocharts.model.Axis;
@@ -76,8 +79,14 @@ public class MainActivity extends Activity
      */
     private Country mCountry;
 
-    String indicatorString = null;
+    /**
+     * The graph that the data is added to
+     */
+    private LineChartView chart;
 
+
+    String indicatorString = null;
+    String indicatorNameString;
     IndicatorClass[] population = null;
     static float popMax;
     static float popMin;
@@ -91,25 +100,34 @@ public class MainActivity extends Activity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.e("EnteredOnCreate", "on create method started");
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
         setContentView(R.layout.activity_main);
 
+        if (!isConnected()) {
+            createNetErrorDialog();
 
-        //ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, actions);
+        }
+
         SpinnerAdapter mSpinnerAdapter = ArrayAdapter.createFromResource(this,
                 R.array.spinner_array, android.R.layout.simple_spinner_dropdown_item);
         getActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
 
         ActionBar.OnNavigationListener navigationListener = new ActionBar.OnNavigationListener() {
 
-            String[] strings = getResources().getStringArray(R.array.spinner_array);
+            String[] indicators = getResources().getStringArray(R.array.indicator_string_array);
+            String[] indicatorNames = getResources().getStringArray(R.array.spinner_array);
 
             @Override
             public boolean onNavigationItemSelected(int itemPosition, long itemId) {
-                indicatorString = strings[itemPosition];
-                Toast.makeText(getBaseContext(), "You selected : " + strings[itemPosition], Toast.LENGTH_SHORT).show();
-                new DownloadJson().execute();
+                if (isConnected()) {
+                    indicatorString = indicators[itemPosition];
+                    indicatorNameString = indicatorNames[itemPosition];
+                    Toast.makeText(getBaseContext(), "You selected : " + indicatorNames[itemPosition], Toast.LENGTH_SHORT).show();
+                    new DownloadJson().execute();
+                }
                 return false;
+
             }
         };
 
@@ -124,16 +142,17 @@ public class MainActivity extends Activity
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
 
-
     }
 
     @Override
     public void onNavigationDrawerItemSelected(int position) {
-        // update the main content by replacing fragments
-        FragmentManager fragmentManager = getFragmentManager();
-        fragmentManager.beginTransaction()
-                .replace(R.id.container, PlaceholderFragment.newInstance(position + 1))
-                .commit();
+        if(isConnected()) {
+            // update the main content by replacing fragments
+            FragmentManager fragmentManager = getFragmentManager();
+            fragmentManager.beginTransaction()
+                    .replace(R.id.container, PlaceholderFragment.newInstance(position + 1))
+                    .commit();
+        }
     }
 
     public void onSectionAttached(int number) {
@@ -148,7 +167,6 @@ public class MainActivity extends Activity
                 mTitle = getString(R.string.title_section3);
                 break;
         }*/
-
         mCountry = CountryData.getCountry(number - 1);
 
         DownloadJson dj = new DownloadJson();
@@ -195,8 +213,9 @@ public class MainActivity extends Activity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        if (id == R.id.about) {
+            Intent i = new Intent(this, HomeScreenActivity.class);
+            startActivity(i);
         }
 
         return super.onOptionsItemSelected(item);
@@ -225,6 +244,13 @@ public class MainActivity extends Activity
         }
 
         public PlaceholderFragment() {
+        }
+
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+
+            setRetainInstance(true);
         }
 
         @Override
@@ -275,7 +301,7 @@ public class MainActivity extends Activity
     private void setUpGraph() {
         LineChartView chart = (LineChartView) findViewById(R.id.country_detail);
         LineChartData data;
-
+        final HashMap<PointValue, String> originalPopulations = new HashMap<PointValue, String>();
         Line line;
         List<PointValue> values;
         List<Line> lines = new ArrayList<Line>();
@@ -288,12 +314,10 @@ public class MainActivity extends Activity
             float populationValueFloat = Float.parseFloat(populationValue);
             float populationYearFloat = Float.parseFloat(populationYear);
 
-
             float scalePopulation = GraphHelper.scaleValues(indicatorMax, indicatorMin, popMax, popMin, populationValueFloat);
-
-            values.add(new PointValue(populationYearFloat, scalePopulation));
-
-
+            PointValue pv = new PointValue(populationYearFloat, scalePopulation);
+            values.add(pv);
+            originalPopulations.put(pv,populationValue);
         }
 
         line = new Line(values);
@@ -310,8 +334,6 @@ public class MainActivity extends Activity
             if(indicator[i].getValue() != null) {
                 float healthValue = Float.parseFloat(indicator[i].getValue());
                 float healthYear = Float.parseFloat(indicator[i].getDate());
-
-
 
                 values.add(new PointValue(healthYear, healthValue));
             }
@@ -333,13 +355,33 @@ public class MainActivity extends Activity
         data.setAxisXBottom(yearAxis);
 
 
-        data.setAxisYLeft(new Axis().setName("Percentage of Health Expenditure").setHasLines(true).setTextColor(Color.BLUE));
-        data.setAxisYRight(new Axis().setName("Population").setTextColor(Color.RED)
-                .setFormatter(new HeightValueFormatter(0, null, null)).setInside(true));
+        data.setAxisYLeft(new Axis().setName(indicatorNameString).setHasLines(true).setTextColor(Color.BLUE));
+        data.setAxisYRight(new Axis().setTextColor(Color.RED)
+                .setFormatter(new HeightValueFormatter(0, null, null)).setName("Population").setMaxLabelChars(3));
 
 
         chart.setLineChartData(data);
+        chart.setOnValueTouchListener(new LineChartView.LineChartOnValueTouchListener(){
+            DecimalFormat df = new DecimalFormat("#.##");
 
+            @Override
+            public void onValueTouched(int i, int i2, PointValue pointValue) {
+                Log.i("lINE TOUCHED","" + i);
+                String text = "\nYear: " + Math.round(pointValue.getX());
+                if(i == 0){
+                    text = "Population: " + originalPopulations.get(pointValue) + text;
+                }else{
+                    text = indicatorNameString + ": " + df.format(pointValue.getY()) + text;
+                }
+                Toast.makeText(MainActivity.this, "line " + i + " touched\n" + text , Toast.LENGTH_LONG).show();
+
+            }
+
+            @Override
+            public void onNothingTouched() {
+
+            }
+        });
     /*
         Viewport v = chart.getMaximumViewport();
         v.set(v.left, healthPercentRange, v.right, 0);
@@ -523,16 +565,16 @@ public class MainActivity extends Activity
         }
     };
 
-    protected void createNetErrorDialog() {
+    /*protected void createNetErrorDialog() {
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage("You need a network connection to use this application. Please turn on mobile network or Wi-Fi in Settings.")
                 .setTitle("Unable to connect")
                 .setCancelable(false)
                 .setPositiveButton("Settings",
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
-                                Intent i = new Intent(Settings.ACTION_WIRELESS_SETTINGS);
+                                Intent i = new Intent(Settings.ACTION_WIFI_SETTINGS);
                                 startActivity(i);
                             }
                         }
@@ -540,7 +582,28 @@ public class MainActivity extends Activity
                 .setNegativeButton("Cancel",
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
-                                android.os.Process.killProcess(android.os.Process.myPid());
+                                if(isConnected()) {
+                                    dialog.dismiss();
+                                }else{
+                                    finish();
+                                }
+                            }
+                        }
+                );
+        AlertDialog alert = builder.create();
+        alert.show();
+    }*/
+
+    protected void createNetErrorDialog() {
+
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("You need a network connection to use this application. Please turn on mobile network or Wi-Fi in Settings.")
+                .setTitle("Unable to connect")
+                .setCancelable(false)
+                .setNegativeButton("Cancel",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                    finish();
                             }
                         }
                 );
@@ -548,4 +611,15 @@ public class MainActivity extends Activity
         alert.show();
     }
 
+
+    private boolean isConnected(){
+        ConnectivityManager cm =
+                (ConnectivityManager)getBaseContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+
+        return isConnected;
+    }
 }
