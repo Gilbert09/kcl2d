@@ -9,9 +9,11 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 
 public class CountryData {
     public static ArrayList<Country> countries = new ArrayList<Country>();
+    public static HashMap<String,Country> countryHashMap = new HashMap<String, Country>();
 
     public static void loadCountries(Context context) {
         // Remove all items (if any) before adding them (orientation change)
@@ -39,6 +41,8 @@ public class CountryData {
             for (int i = 0; i < countriesJSONArray.length(); i++) {
                 obj = countriesJSONArray.getJSONObject(i);
                 countries.add(new Country(obj.get("id").toString(), obj.get("name").toString()));
+                Country country = new Country(obj.get("id").toString(), obj.get("name").toString());
+                countryHashMap.put(country.getName(),country);
             }
 
             // Sort countries based on their name (default is ID which is confusing)
@@ -48,6 +52,8 @@ public class CountryData {
                     return o1.getName().compareTo(o2.getName());
                 }
             });
+
+
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -58,13 +64,14 @@ public class CountryData {
     }
 
     /**
-     * This method searches for a country with the given id
-     * @param id The 3 letter id of the country
-     * @return The country with the id or null if nothing was found
+     * This method searches for a country with the given name
+     *
+     * @param name The name of the country
+     * @return The country if it was found, else null
      */
-    public static Country getCountry(String id) {
+    public static Country searchCountry(String name) {
         for (Country country : countries) {
-            if (country.id.equals(id))
+            if (country.name.equals(name))
                 return country;
         }
         return null;
