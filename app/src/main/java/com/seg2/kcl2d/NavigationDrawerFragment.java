@@ -13,6 +13,7 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -70,6 +71,7 @@ public class NavigationDrawerFragment extends Fragment implements SearchView.OnQ
     private int searchViews;
     private boolean mFromSavedInstanceState;
     private boolean mUserLearnedDrawer;
+    private String mCountryName;
 
     public NavigationDrawerFragment() {
     }
@@ -105,7 +107,27 @@ public class NavigationDrawerFragment extends Fragment implements SearchView.OnQ
         mDrawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                selectItem(position);
+                TextView tv = (TextView) view.findViewById(android.R.id.text1);
+
+                // Get the selected country name as a string
+                String selectedCountryName = mDrawerListView.getItemAtPosition(position).toString();
+                // Search for this country to get the Country object
+                Country selectedCountry = CountryData.searchCountry(selectedCountryName);
+                // Get the index of this country in the countries array in CountryData
+                int selectedCountryIndex = CountryData.countries.indexOf(selectedCountry);
+
+                Log.d("CountryPositionToShow", "pos: " + selectedCountryIndex);
+                Log.d("CountryToShow", selectedCountry.getName());
+
+                selectItem(selectedCountryIndex);
+
+                int svID  = sv.getContext().getResources().getIdentifier("android:id/search_src_text", null, null);
+                TextView textView = (TextView) sv.findViewById(svID);
+
+                if(textView.getText().length() > 0) {
+                    Toast.makeText(getActivity(), textView.getText().toString(), Toast.LENGTH_LONG).show();
+                }
+
             }
         });
         /*
@@ -158,8 +180,8 @@ public class NavigationDrawerFragment extends Fragment implements SearchView.OnQ
             sv.setOnQueryTextListener(this);
             sv.setIconifiedByDefault(true);
             TextView textView = (TextView) sv.findViewById(id);
-            //textView.setTextColor(Color.WHITE);
-            if(searchViews == 0){
+
+            if(searchViews == 0) {
                 searchViews++;
             }
         }
@@ -345,7 +367,7 @@ public class NavigationDrawerFragment extends Fragment implements SearchView.OnQ
         if (TextUtils.isEmpty(newText)) {
             mDrawerListView.clearTextFilter();
         } else {
-            mDrawerListView.setFilterText(newText.toString());
+            mDrawerListView.setFilterText(newText);
         }
         return true;
     }
