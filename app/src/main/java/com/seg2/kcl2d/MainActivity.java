@@ -76,12 +76,6 @@ public class MainActivity extends Activity
      */
     private Country mCountry;
 
-    /**
-     * The graph that the data is added to
-     */
-    private LineChartView chart;
-
-
     String indicatorString = null;
 
     IndicatorClass[] population = null;
@@ -341,7 +335,7 @@ public class MainActivity extends Activity
 
         data.setAxisYLeft(new Axis().setName("Percentage of Health Expenditure").setHasLines(true).setTextColor(Color.BLUE));
         data.setAxisYRight(new Axis().setName("Population").setTextColor(Color.RED)
-                .setFormatter(new HeightValueFormatter(0, null, null)));
+                .setFormatter(new HeightValueFormatter(0, null, null)).setInside(true));
 
 
         chart.setLineChartData(data);
