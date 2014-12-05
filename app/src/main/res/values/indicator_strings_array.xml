@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="indicator_string_array">
+        <item>SP.DYN.LE00.MA.IN</item>
+        <item>EN.ATM.CO2E.PC</item>
+    </string-array>
+</resources>
