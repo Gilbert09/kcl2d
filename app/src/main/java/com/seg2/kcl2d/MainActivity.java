@@ -357,7 +357,7 @@ public class MainActivity extends Activity
 
         data.setAxisYLeft(new Axis().setName(indicatorNameString).setHasLines(true).setTextColor(Color.BLUE));
         data.setAxisYRight(new Axis().setTextColor(Color.RED)
-                .setFormatter(new HeightValueFormatter(0, null, null)).setName("Population").setMaxLabelChars(3));
+                .setFormatter(new HeightValueFormatter(0, null, null)).setName("Population").setMaxLabelChars(3).setInside(true));
 
 
         chart.setLineChartData(data);
