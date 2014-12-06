@@ -16,6 +16,7 @@ public class GraphHelper {
         double tempValueFloat;
         try {
             JSONObject jsonObject = (JSONObject) jsonArray.get(0);
+            Log.i("ff", jsonObject.toString());
 
             if(jsonObject.isNull("value")) {
                 Log.i("isNull", "isNull");

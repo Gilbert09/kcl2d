@@ -3,6 +3,7 @@ package com.seg2.kcl2d;
 
 import android.app.Activity;
 import android.app.ActionBar;
+import android.app.DialogFragment;
 import android.app.Fragment;
 import android.graphics.Color;
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -107,25 +108,17 @@ public class NavigationDrawerFragment extends Fragment implements SearchView.OnQ
         mDrawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                //get textview from the view selected in the list view
                 TextView tv = (TextView) view.findViewById(android.R.id.text1);
 
-                // Get the selected country name as a string
-                String selectedCountryName = mDrawerListView.getItemAtPosition(position).toString();
-                // Search for this country to get the Country object
-                Country selectedCountry = CountryData.searchCountry(selectedCountryName);
-                // Get the index of this country in the countries array in CountryData
-                int selectedCountryIndex = CountryData.countries.indexOf(selectedCountry);
-
-                Log.d("CountryPositionToShow", "pos: " + selectedCountryIndex);
-                Log.d("CountryToShow", selectedCountry.getName());
-
-                selectItem(selectedCountryIndex);
-
-                int svID  = sv.getContext().getResources().getIdentifier("android:id/search_src_text", null, null);
+                int svID = sv.getContext().getResources().getIdentifier("android:id/search_src_text", null, null);
+                //get textview from searchView
                 TextView textView = (TextView) sv.findViewById(svID);
-
-                if(textView.getText().length() > 0) {
-                    Toast.makeText(getActivity(), textView.getText().toString(), Toast.LENGTH_LONG).show();
+                if (textView.getText().length() > 0) {
+                    Toast.makeText(getActivity(), tv.getText().toString(), Toast.LENGTH_LONG).show();
+                    selectItem(tv.getText().toString(), position);
+                }else{
+                    selectItem(position);
                 }
 
             }
@@ -153,7 +146,7 @@ public class NavigationDrawerFragment extends Fragment implements SearchView.OnQ
                 getActivity(),
                 android.R.layout.simple_list_item_activated_1,
                 android.R.id.text1,
-                CountryData.countries));
+                new ArrayList<Country>(CountryData.countryHashMap.values())));
 
         mDrawerListView.setTextFilterEnabled(true);
         mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
@@ -180,8 +173,8 @@ public class NavigationDrawerFragment extends Fragment implements SearchView.OnQ
             sv.setOnQueryTextListener(this);
             sv.setIconifiedByDefault(true);
             TextView textView = (TextView) sv.findViewById(id);
-
-            if(searchViews == 0) {
+            //textView.setTextColor(Color.WHITE);
+            if(searchViews == 0){
                 searchViews++;
             }
         }
@@ -287,6 +280,19 @@ public class NavigationDrawerFragment extends Fragment implements SearchView.OnQ
         }
     }
 
+    private void selectItem(String countryName, int position){
+        mCurrentSelectedPosition = position;
+        if (mDrawerListView != null) {
+            mDrawerListView.setItemChecked(position, true);
+        }
+        if (mDrawerLayout != null) {
+            mDrawerLayout.closeDrawer(mFragmentContainerView);
+        }
+        if(mCallbacks != null){
+            mCallbacks.onNavigationDrawerItemSelected(countryName, position);
+        }
+    }
+
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
@@ -367,7 +373,7 @@ public class NavigationDrawerFragment extends Fragment implements SearchView.OnQ
         if (TextUtils.isEmpty(newText)) {
             mDrawerListView.clearTextFilter();
         } else {
-            mDrawerListView.setFilterText(newText);
+            mDrawerListView.setFilterText(newText.toString());
         }
         return true;
     }
@@ -380,5 +386,6 @@ public class NavigationDrawerFragment extends Fragment implements SearchView.OnQ
          * Called when an item in the navigation drawer is selected.
          */
         void onNavigationDrawerItemSelected(int position);
+        void onNavigationDrawerItemSelected(String countryName, int position);
     }
 }

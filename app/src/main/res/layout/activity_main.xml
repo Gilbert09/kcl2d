@@ -21,4 +21,6 @@
         android:layout_gravity="start" android:name="com.seg2.kcl2d.NavigationDrawerFragment"
         tools:layout="@layout/fragment_navigation_drawer" />
 
+    
+
 </android.support.v4.widget.DrawerLayout>

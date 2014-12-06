@@ -2,4 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools" tools:context=".MainActivity">
     <item android:id="@+id/about" android:title="@string/about"
         android:orderInCategory="100" android:showAsAction="never" />
+    <item android:id="@+id/select_time_range" android:title="@string/select_time_range"
+        android:orderInCategory="100" android:showAsAction="ifRoom" />
+
 </menu>

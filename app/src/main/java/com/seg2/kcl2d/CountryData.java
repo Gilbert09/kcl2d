@@ -10,10 +10,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class CountryData {
     public static ArrayList<Country> countries = new ArrayList<Country>();
-    public static HashMap<String,Country> countryHashMap = new HashMap<String, Country>();
+    public static TreeMap<String,Country> countryHashMap = new TreeMap<String, Country>();
 
     public static void loadCountries(Context context) {
         // Remove all items (if any) before adding them (orientation change)
@@ -46,12 +48,14 @@ public class CountryData {
             }
 
             // Sort countries based on their name (default is ID which is confusing)
-            Collections.sort(countries, new Comparator<Country>() {
+            /*Collections.sort(countries, new Comparator<Country>() {
                 @Override
                 public int compare(Country o1, Country o2) {
                     return o1.getName().compareTo(o2.getName());
                 }
-            });
+            });*/
+
+            //Map<String, Country> map = new TreeMap<String, Country>(countryHashMap);
 
 
         } catch (FileNotFoundException e) {
@@ -64,20 +68,16 @@ public class CountryData {
     }
 
     /**
-     * This method searches for a country with the given name
-     *
-     * @param name The name of the country
-     * @return The country if it was found, else null
+     * This method searches for a country with the given id
+     * @param id The 3 letter id of the country
+     * @return The country with the id or null if nothing was found
      */
-    public static Country searchCountry(String name) {
-        for (Country country : countries) {
-            if (country.name.equals(name))
-                return country;
-        }
-        return null;
+    public static Country getCountry(String id) {
+        return countryHashMap.get(id);
     }
 
     public static Country getCountry(int id) {
-        return countries.get(id);
+        ArrayList<Country> countryList = new ArrayList<Country>(countryHashMap.values());
+        return countryList.get(id);
     }
 }

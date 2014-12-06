@@ -4,6 +4,7 @@ import android.app.Activity;
 
 import android.app.ActionBar;
 import android.app.AlertDialog;
+import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.ProgressDialog;
@@ -28,6 +29,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.SpinnerAdapter;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
@@ -62,7 +64,7 @@ import lecho.lib.hellocharts.view.LineChartView;
 
 
 public class MainActivity extends Activity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks {
+        implements NavigationDrawerFragment.NavigationDrawerCallbacks, SelectYearsDialog.SelectYearsDialogListener {
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -94,6 +96,8 @@ public class MainActivity extends Activity
     IndicatorClass[] indicator = null;
     static float indicatorMax;
     static float indicatorMin;
+    private String firstYear = "1980";
+    private String lastYear = "2010";
 
 
 
@@ -155,6 +159,17 @@ public class MainActivity extends Activity
         }
     }
 
+    @Override
+    public void onNavigationDrawerItemSelected(String countryName, int position) {
+        if(isConnected()) {
+            // update the main content by replacing fragments
+            FragmentManager fragmentManager = getFragmentManager();
+            fragmentManager.beginTransaction()
+                    .replace(R.id.container, PlaceholderFragment.newInstance(countryName, position + 1))
+                    .commit();
+        }
+    }
+
     public void onSectionAttached(int number) {
         /*switch (number) {
             case 1:
@@ -168,6 +183,14 @@ public class MainActivity extends Activity
                 break;
         }*/
         mCountry = CountryData.getCountry(number - 1);
+
+        DownloadJson dj = new DownloadJson();
+        dj.execute();
+    }
+
+    public void onSectionAttached(String countryName) {
+
+        mCountry = CountryData.getCountry(countryName);
 
         DownloadJson dj = new DownloadJson();
         dj.execute();
@@ -218,7 +241,29 @@ public class MainActivity extends Activity
             startActivity(i);
         }
 
+        switch(id){
+            case R.id.about: Intent i = new Intent(this, HomeScreenActivity.class);
+                startActivity(i);
+                break;
+            case R.id.select_time_range: SelectYearsDialog syd = new SelectYearsDialog();
+                syd.show(getFragmentManager(), "Dialog");
+
+        }
+
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onDialogPositiveClick(DialogFragment dialog, String firstYear, String lastYear) {
+        this.firstYear = firstYear;
+        this.lastYear = lastYear;
+
+        new DownloadJson().execute();
+    }
+
+    @Override
+    public void onDialogNegativeClick(DialogFragment dialog) {
+
     }
 
     /**
@@ -231,6 +276,9 @@ public class MainActivity extends Activity
          */
         private static final String ARG_SECTION_NUMBER = "section_number";
 
+
+        private static final String COUNTRY_NAME = "country_name";
+
         /**
          * Returns a new instance of this fragment for the given section
          * number.
@@ -239,6 +287,15 @@ public class MainActivity extends Activity
             PlaceholderFragment fragment = new PlaceholderFragment();
             Bundle args = new Bundle();
             args.putInt(ARG_SECTION_NUMBER, sectionNumber);
+            fragment.setArguments(args);
+            return fragment;
+        }
+
+        public static PlaceholderFragment newInstance(String countryName, int sectionNumber) {
+            PlaceholderFragment fragment = new PlaceholderFragment();
+            Bundle args = new Bundle();
+            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
+            args.putString(COUNTRY_NAME, countryName);
             fragment.setArguments(args);
             return fragment;
         }
@@ -263,8 +320,14 @@ public class MainActivity extends Activity
         @Override
         public void onAttach(Activity activity) {
             super.onAttach(activity);
-            ((MainActivity) activity).onSectionAttached(
-                    getArguments().getInt(ARG_SECTION_NUMBER));
+            Bundle args = getArguments();
+            if(!args.containsKey(COUNTRY_NAME)) {
+                ((MainActivity) activity).onSectionAttached(
+                        getArguments().getInt(ARG_SECTION_NUMBER));
+            }else{
+                ((MainActivity) activity).onSectionAttached(
+                        getArguments().getString(COUNTRY_NAME));
+            }
         }
     }
 
@@ -357,7 +420,7 @@ public class MainActivity extends Activity
 
         data.setAxisYLeft(new Axis().setName(indicatorNameString).setHasLines(true).setTextColor(Color.BLUE));
         data.setAxisYRight(new Axis().setTextColor(Color.RED)
-                .setFormatter(new HeightValueFormatter(0, null, null)).setName("Population").setMaxLabelChars(3).setInside(true));
+                .setFormatter(new HeightValueFormatter(0, null, null)).setName("Population").setMaxLabelChars(3));
 
 
         chart.setLineChartData(data);
@@ -373,7 +436,7 @@ public class MainActivity extends Activity
                 }else{
                     text = indicatorNameString + ": " + df.format(pointValue.getY()) + text;
                 }
-                Toast.makeText(MainActivity.this, "line " + i + " touched\n" + text , Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.this,text , Toast.LENGTH_LONG).show();
 
             }
 
@@ -434,7 +497,8 @@ public class MainActivity extends Activity
 
             StringBuilder builder = new StringBuilder();
 
-            url = "http://api.worldbank.org/countries/"+ mCountry.getId() +"/indicators/SP.POP.TOTL?date=1960:2009&format=json";
+            url = "http://api.worldbank.org/countries/"+ mCountry.getId() +"/indicators/SP.POP.TOTL?date=" + firstYear + ":"
+                    + lastYear + "&format=json";
 
             HttpClient client = new DefaultHttpClient();
             HttpGet httpGet = new HttpGet(url);
@@ -472,7 +536,8 @@ public class MainActivity extends Activity
 
             StringBuilder builderIndicator = new StringBuilder();
 
-            url = "http://api.worldbank.org/countries/"+ mCountry.getId() +"/indicators/"+ indicatorString +"?date=1960:2009&format=json";
+            url = "http://api.worldbank.org/countries/"+ mCountry.getId() +"/indicators/"+ indicatorString +"?date=" + firstYear + ":" +
+                    lastYear + "&format=json";
 
             HttpClient clientIndicator = new DefaultHttpClient();
             HttpGet httpGetIndicator = new HttpGet(url);
@@ -542,8 +607,8 @@ public class MainActivity extends Activity
                 indicatorMin = indicatorMinMax[0];
                 indicatorMax = indicatorMinMax[1];
 
-                // TextView tv = (TextView) rootView.findViewById(R.id.country_detail);
-                //tv.setText(indicator[0].getValue());
+                TextView tv = (TextView)findViewById(R.id.country_name);
+                tv.setText(mCountry.getName());
 
                 setUpGraph();
 
