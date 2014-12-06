@@ -18,7 +18,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -63,8 +62,7 @@ import lecho.lib.hellocharts.model.SimpleValueFormatter;
 import lecho.lib.hellocharts.view.LineChartView;
 
 
-public class MainActivity extends Activity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks, SelectYearsDialog.SelectYearsDialogListener {
+public class MainActivity extends Activity implements NavigationDrawerFragment.NavigationDrawerCallbacks, SelectYearsDialog.SelectYearsDialogListener {
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -86,6 +84,11 @@ public class MainActivity extends Activity
      */
     private LineChartView chart;
 
+    /**
+     * Toast that shows when a point is selected
+     */
+    private Toast infoToast;
+
 
     String indicatorString = null;
     String indicatorNameString;
@@ -104,13 +107,11 @@ public class MainActivity extends Activity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.e("EnteredOnCreate", "on create method started");
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
         setContentView(R.layout.activity_main);
 
         if (!isConnected()) {
             createNetErrorDialog();
-
         }
 
         SpinnerAdapter mSpinnerAdapter = ArrayAdapter.createFromResource(this,
@@ -137,8 +138,7 @@ public class MainActivity extends Activity
 
         getActionBar().setListNavigationCallbacks(mSpinnerAdapter, navigationListener);
 
-        mNavigationDrawerFragment = (NavigationDrawerFragment)
-                getFragmentManager().findFragmentById(R.id.navigation_drawer);
+        mNavigationDrawerFragment = (NavigationDrawerFragment) getFragmentManager().findFragmentById(R.id.navigation_drawer);
         mTitle = getTitle();
 
         // Set up the drawer.
@@ -235,19 +235,14 @@ public class MainActivity extends Activity
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.about) {
-            Intent i = new Intent(this, HomeScreenActivity.class);
-            startActivity(i);
-        }
-
-        switch(id){
-            case R.id.about: Intent i = new Intent(this, HomeScreenActivity.class);
+        switch (id) {
+            case R.id.about:
+                Intent i = new Intent(this, HomeScreenActivity.class);
                 startActivity(i);
                 break;
-            case R.id.select_time_range: SelectYearsDialog syd = new SelectYearsDialog();
+            case R.id.select_time_range:
+                SelectYearsDialog syd = new SelectYearsDialog();
                 syd.show(getFragmentManager(), "Dialog");
-
         }
 
         return super.onOptionsItemSelected(item);
@@ -362,14 +357,15 @@ public class MainActivity extends Activity
     */
 
     private void setUpGraph() {
+        final HashMap<PointValue, String> originalPopulations = new HashMap<PointValue, String>();
         LineChartView chart = (LineChartView) findViewById(R.id.country_detail);
         LineChartData data;
-        final HashMap<PointValue, String> originalPopulations = new HashMap<PointValue, String>();
         Line line;
         List<PointValue> values;
         List<Line> lines = new ArrayList<Line>();
 
         values = new ArrayList<PointValue>();
+
         for (int i = 0; i < population.length; i++) {
             String populationValue = population[i].getValue();
             String populationYear = population[i].getDate();
@@ -380,20 +376,17 @@ public class MainActivity extends Activity
             float scalePopulation = GraphHelper.scaleValues(indicatorMax, indicatorMin, popMax, popMin, populationValueFloat);
             PointValue pv = new PointValue(populationYearFloat, scalePopulation);
             values.add(pv);
-            originalPopulations.put(pv,populationValue);
+            originalPopulations.put(pv, populationValue);
         }
 
         line = new Line(values);
-        line.setColor(Color.RED);
+        line.setColor(Color.parseColor("#CC0000"));
         line.setHasPoints(false);
         lines.add(line);
 
-
-
         values = new ArrayList<PointValue>();
-        for (int i = 0; i < indicator.length; i++) {
-            //Log.i("health.i", i + "");
 
+        for (int i = 0; i < indicator.length; i++) {
             if(indicator[i].getValue() != null) {
                 float healthValue = Float.parseFloat(indicator[i].getValue());
                 float healthYear = Float.parseFloat(indicator[i].getDate());
@@ -402,42 +395,53 @@ public class MainActivity extends Activity
             }
         }
 
-        //values.add(new PointValue(1960f, 0f));
         line = new Line(values);
-        line.setColor(Color.BLUE);
+        line.setColor(Color.parseColor("#0099CC"));
         lines.add(line);
 
         data = new LineChartData(lines);
 
+        // Bottom X Axis
+        Axis bottomXAxis = new Axis();
+        bottomXAxis.setName("Year");
+        bottomXAxis.setMaxLabelChars(5);
+        bottomXAxis.setHasLines(true);
+        data.setAxisXBottom(bottomXAxis);
 
-        Axis yearAxis = new Axis();
-        yearAxis.setName("Year");
-        yearAxis.setMaxLabelChars(4);
-        yearAxis.setFormatter(new SimpleValueFormatter(0, false, null, null));
-        yearAxis.setHasLines(true);
-        data.setAxisXBottom(yearAxis);
+        // Left Y Axis
+        Axis leftYAxis = new Axis();
+        leftYAxis.setName(indicatorNameString);
+        leftYAxis.setTextColor(Color.parseColor("#0099CC"));
+        leftYAxis.setHasLines(true);
+        data.setAxisYLeft(leftYAxis);
 
-
-        data.setAxisYLeft(new Axis().setName(indicatorNameString).setHasLines(true).setTextColor(Color.BLUE));
-        data.setAxisYRight(new Axis().setTextColor(Color.RED)
-                .setFormatter(new HeightValueFormatter(0, null, null)).setName("Population").setMaxLabelChars(3));
-
+        // Right Y Axis
+        Axis rightYAxis = new Axis();
+        rightYAxis.setName("Population");
+        rightYAxis.setTextColor(Color.parseColor("#CC0000"));
+        rightYAxis.setFormatter(new HeightValueFormatter(0, null, null));
+        rightYAxis.setMaxLabelChars(10);
+        data.setAxisYRight(rightYAxis);
 
         chart.setLineChartData(data);
-        chart.setOnValueTouchListener(new LineChartView.LineChartOnValueTouchListener(){
+        chart.setOnValueTouchListener(new LineChartView.LineChartOnValueTouchListener() {
             DecimalFormat df = new DecimalFormat("#.##");
 
             @Override
             public void onValueTouched(int i, int i2, PointValue pointValue) {
-                Log.i("lINE TOUCHED","" + i);
-                String text = "\nYear: " + Math.round(pointValue.getX());
-                if(i == 0){
-                    text = "Population: " + originalPopulations.get(pointValue) + text;
-                }else{
-                    text = indicatorNameString + ": " + df.format(pointValue.getY()) + text;
-                }
-                Toast.makeText(MainActivity.this,text , Toast.LENGTH_LONG).show();
+                // Hide toast when a new one should appear
+                if (infoToast != null)
+                    infoToast.cancel();
 
+                String text = "Year: " + Math.round(pointValue.getX());
+                if (i == 0) {
+                    text += "\nPopulation: " + originalPopulations.get(pointValue);
+                } else {
+                    text += "\n" + indicatorNameString + ": " + df.format(pointValue.getY());
+                }
+
+                infoToast = Toast.makeText(MainActivity.this, text, Toast.LENGTH_SHORT);
+                infoToast.show();
             }
 
             @Override

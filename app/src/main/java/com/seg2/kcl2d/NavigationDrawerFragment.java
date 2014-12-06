@@ -108,16 +108,16 @@ public class NavigationDrawerFragment extends Fragment implements SearchView.OnQ
         mDrawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                //get textview from the view selected in the list view
-                TextView tv = (TextView) view.findViewById(android.R.id.text1);
+                String selectedCountryName = ((TextView) view.findViewById(android.R.id.text1)).getText().toString();
 
                 int svID = sv.getContext().getResources().getIdentifier("android:id/search_src_text", null, null);
-                //get textview from searchView
-                TextView textView = (TextView) sv.findViewById(svID);
-                if (textView.getText().length() > 0) {
-                    Toast.makeText(getActivity(), tv.getText().toString(), Toast.LENGTH_LONG).show();
-                    selectItem(tv.getText().toString(), position);
-                }else{
+
+                String searchFieldText = ((TextView) sv.findViewById(svID)).getText().toString();
+
+                if (searchFieldText.length() > 0) {
+                    // If some text was entered
+                    selectItem(selectedCountryName, position);
+                } else {
                     selectItem(position);
                 }
 
@@ -269,6 +269,7 @@ public class NavigationDrawerFragment extends Fragment implements SearchView.OnQ
 
     private void selectItem(int position) {
         mCurrentSelectedPosition = position;
+
         if (mDrawerListView != null) {
             mDrawerListView.setItemChecked(position, true);
         }
@@ -280,15 +281,16 @@ public class NavigationDrawerFragment extends Fragment implements SearchView.OnQ
         }
     }
 
-    private void selectItem(String countryName, int position){
+    private void selectItem(String countryName, int position) {
         mCurrentSelectedPosition = position;
+
         if (mDrawerListView != null) {
             mDrawerListView.setItemChecked(position, true);
         }
         if (mDrawerLayout != null) {
             mDrawerLayout.closeDrawer(mFragmentContainerView);
         }
-        if(mCallbacks != null){
+        if (mCallbacks != null) {
             mCallbacks.onNavigationDrawerItemSelected(countryName, position);
         }
     }
@@ -356,7 +358,6 @@ public class NavigationDrawerFragment extends Fragment implements SearchView.OnQ
         actionBar.setDisplayShowTitleEnabled(true);
         actionBar.setTitle("Countries");
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-        //actionBar.setTitle(R.string.app_name);
     }
 
     private ActionBar getActionBar() {

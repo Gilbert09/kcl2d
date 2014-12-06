@@ -13,7 +13,7 @@
         android:id="@+id/country_detail"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="30dp"
+        android:paddingTop="30dp"
         android:textIsSelectable="true"
         android:layout_alignParentStart="true" />
 

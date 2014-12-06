@@ -10,7 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.NumberPicker;
 
-public class SelectYearsDialog extends DialogFragment{
+public class SelectYearsDialog extends DialogFragment {
 
     SelectYearsDialogListener mListener;
     private String firstYear;
@@ -78,7 +78,6 @@ public class SelectYearsDialog extends DialogFragment{
     }
 
     private void createSelectionErrorDialog() {
-
         final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setMessage("Final year cannot be less than or equal to first year. Please select again.")
                 .setTitle("Selection Error")
