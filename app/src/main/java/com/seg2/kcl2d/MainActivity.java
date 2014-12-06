@@ -99,8 +99,8 @@ public class MainActivity extends Activity implements NavigationDrawerFragment.N
     IndicatorClass[] indicator = null;
     static float indicatorMax;
     static float indicatorMin;
-    private String firstYear = "1980";
-    private String lastYear = "2010";
+    private String firstYear = "1970";
+    private String lastYear = "2000";
 
 
 
@@ -258,7 +258,6 @@ public class MainActivity extends Activity implements NavigationDrawerFragment.N
 
     @Override
     public void onDialogNegativeClick(DialogFragment dialog) {
-
     }
 
     /**
@@ -501,8 +500,7 @@ public class MainActivity extends Activity implements NavigationDrawerFragment.N
 
             StringBuilder builder = new StringBuilder();
 
-            url = "http://api.worldbank.org/countries/"+ mCountry.getId() +"/indicators/SP.POP.TOTL?date=" + firstYear + ":"
-                    + lastYear + "&format=json";
+            url = "http://api.worldbank.org/countries/"+ mCountry.getId() +"/indicators/SP.POP.TOTL?date=" + firstYear + ":" + lastYear + "&format=json";
 
             HttpClient client = new DefaultHttpClient();
             HttpGet httpGet = new HttpGet(url);

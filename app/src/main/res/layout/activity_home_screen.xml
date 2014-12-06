@@ -25,6 +25,6 @@
             android:background="@drawable/button_shape"
             android:textColor="#FFFFFF"
             android:onClick="showMain"
-            android:drawableRight="@drawable/chevron_right"
+            android:drawableRight="@drawable/ic_chevron_right"
             android:textSize="25dp" android:gravity="center" android:paddingStart="10dp"/>
 </FrameLayout>
