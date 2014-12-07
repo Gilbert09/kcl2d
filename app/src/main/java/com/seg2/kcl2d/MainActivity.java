@@ -50,9 +50,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 import lecho.lib.hellocharts.model.Axis;
 import lecho.lib.hellocharts.model.Line;
@@ -100,7 +102,7 @@ public class MainActivity extends Activity implements NavigationDrawerFragment.N
     static float indicatorMax;
     static float indicatorMin;
     private String firstYear = "1970";
-    private String lastYear = "2000";
+    private String lastYear = "2005";
 
 
 
@@ -242,6 +244,14 @@ public class MainActivity extends Activity implements NavigationDrawerFragment.N
                 break;
             case R.id.select_time_range:
                 SelectYearsDialog syd = new SelectYearsDialog();
+
+                // Send the years to the dialog fragment
+                // to display as default ones
+                Bundle years = new Bundle(2);
+                years.putInt("firstYear", Integer.parseInt(firstYear));
+                years.putInt("lastYear", Integer.parseInt(lastYear));
+                syd.setArguments(years);
+
                 syd.show(getFragmentManager(), "Dialog");
         }
 
@@ -375,12 +385,11 @@ public class MainActivity extends Activity implements NavigationDrawerFragment.N
             float scalePopulation = GraphHelper.scaleValues(indicatorMax, indicatorMin, popMax, popMin, populationValueFloat);
             PointValue pv = new PointValue(populationYearFloat, scalePopulation);
             values.add(pv);
-            originalPopulations.put(pv, populationValue);
+            originalPopulations.put(pv, NumberFormat.getInstance(Locale.UK).format(Integer.parseInt(populationValue)));
         }
 
         line = new Line(values);
-        line.setColor(Color.parseColor("#CC0000"));
-        line.setHasPoints(false);
+        line.setColor(Color.parseColor("#0C9D58"));
         lines.add(line);
 
         values = new ArrayList<PointValue>();
@@ -395,7 +404,7 @@ public class MainActivity extends Activity implements NavigationDrawerFragment.N
         }
 
         line = new Line(values);
-        line.setColor(Color.parseColor("#0099CC"));
+        line.setColor(Color.parseColor("#53A0FD"));
         lines.add(line);
 
         data = new LineChartData(lines);
@@ -403,29 +412,30 @@ public class MainActivity extends Activity implements NavigationDrawerFragment.N
         // Bottom X Axis
         Axis bottomXAxis = new Axis();
         bottomXAxis.setName("Year");
-        bottomXAxis.setMaxLabelChars(5);
+        bottomXAxis.setTextColor(Color.parseColor("#757575"));
         bottomXAxis.setHasLines(true);
         data.setAxisXBottom(bottomXAxis);
 
         // Left Y Axis
         Axis leftYAxis = new Axis();
         leftYAxis.setName(indicatorNameString);
-        leftYAxis.setTextColor(Color.parseColor("#0099CC"));
+//        leftYAxis.setTextColor(Color.parseColor("#0099CC"));
+        leftYAxis.setTextColor(Color.parseColor("#53A0FD"));
+        leftYAxis.setMaxLabelChars(10);
         leftYAxis.setHasLines(true);
         data.setAxisYLeft(leftYAxis);
 
         // Right Y Axis
         Axis rightYAxis = new Axis();
         rightYAxis.setName("Population");
-        rightYAxis.setTextColor(Color.parseColor("#CC0000"));
+//        rightYAxis.setTextColor(Color.parseColor("#CC0000"));
+        rightYAxis.setTextColor(Color.parseColor("#0C9D58"));
         rightYAxis.setFormatter(new HeightValueFormatter(0, null, null));
         rightYAxis.setMaxLabelChars(10);
         data.setAxisYRight(rightYAxis);
 
         chart.setLineChartData(data);
         chart.setOnValueTouchListener(new LineChartView.LineChartOnValueTouchListener() {
-            DecimalFormat df = new DecimalFormat("#.##");
-
             @Override
             public void onValueTouched(int i, int i2, PointValue pointValue) {
                 // Hide toast when a new one should appear
@@ -433,13 +443,15 @@ public class MainActivity extends Activity implements NavigationDrawerFragment.N
                     infoToast.cancel();
 
                 String text = "Year: " + Math.round(pointValue.getX());
+                // i = 0 -> population line
+                // i = 1 -> indicator line
                 if (i == 0) {
                     text += "\nPopulation: " + originalPopulations.get(pointValue);
                 } else {
-                    text += "\n" + indicatorNameString + ": " + df.format(pointValue.getY());
+                    text += "\n" + indicatorNameString + ": " + NumberFormat.getInstance(Locale.UK).format(pointValue.getY());
                 }
 
-                infoToast = Toast.makeText(MainActivity.this, text, Toast.LENGTH_SHORT);
+                infoToast = Toast.makeText(MainActivity.this, text, Toast.LENGTH_LONG);
                 infoToast.show();
             }
 
@@ -454,13 +466,12 @@ public class MainActivity extends Activity implements NavigationDrawerFragment.N
         chart.setMaximumViewport(v);
         chart.setCurrentViewport(v, false);
         */
-
     }
 
     private static class HeightValueFormatter extends SimpleValueFormatter {
 
-        public HeightValueFormatter(int digits, char[] prependedText, char[] apendedText) {
-            super(digits, true, prependedText, apendedText);
+        public HeightValueFormatter(int digits, char[] prependedText, char[] appendedText) {
+            super(digits, true, prependedText, appendedText);
         }
 
         @Override

@@ -29,8 +29,13 @@ public class SelectYearsDialog extends DialogFragment {
 
         final NumberPicker firstYearPicker = (NumberPicker) view.findViewById(R.id.start_year);
         setUpNumberPicker(firstYearPicker);
+
         final NumberPicker lastYearPicker = (NumberPicker) view.findViewById(R.id.end_year);
         setUpNumberPicker(lastYearPicker);
+
+        // Set default values to the previously selected ones
+        firstYearPicker.setValue(this.getArguments().getInt("firstYear"));
+        lastYearPicker.setValue(this.getArguments().getInt("lastYear"));
 
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
@@ -43,8 +48,8 @@ public class SelectYearsDialog extends DialogFragment {
                 int firstYearValue = firstYearPicker.getValue();
                 int secondYearValue = lastYearPicker.getValue();
 
-                firstYear = new Integer(firstYearValue).toString();
-                lastYear = new Integer(secondYearValue).toString();
+                firstYear = Integer.valueOf(firstYearValue).toString();
+                lastYear = Integer.valueOf(secondYearValue).toString();
 
                 if (firstYearValue >= secondYearValue){
                     createSelectionErrorDialog();
