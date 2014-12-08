@@ -133,7 +133,7 @@ public class MainActivity extends Activity implements NavigationDrawerFragment.N
                 if (isConnected()) {
                     indicatorString = indicators[itemPosition];
                     indicatorNameString = indicatorNames[itemPosition];
-                    Toast.makeText(getBaseContext(), "You selected : " + indicatorNames[itemPosition], Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(getBaseContext(), "You selected : " + indicatorNames[itemPosition], Toast.LENGTH_SHORT).show();
                     new DownloadJson().execute();
                 }
                 return false;
@@ -378,7 +378,8 @@ public class MainActivity extends Activity implements NavigationDrawerFragment.N
 
         line = new Line(values);
         line.setColor(Color.parseColor("#0C9D58"));
-        line.setHasPoints(false);
+        line.setHasPoints(true);
+        line.setPointRadius(4);
         lines.add(line);
 
         values = new ArrayList<PointValue>();
@@ -400,6 +401,7 @@ public class MainActivity extends Activity implements NavigationDrawerFragment.N
 
         line = new Line(values);
         line.setColor(Color.parseColor("#53A0FD"));
+        line.setPointRadius(5);
         lines.add(line);
 
         data = new LineChartData(lines);
