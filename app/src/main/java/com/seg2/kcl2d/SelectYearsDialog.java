@@ -35,8 +35,10 @@ public class SelectYearsDialog extends DialogFragment {
         setUpNumberPicker(lastYearPicker);
 
         // Set default values to the previously selected ones
-        firstYearPicker.setValue(this.getArguments().getInt("firstYear"));
-        lastYearPicker.setValue(this.getArguments().getInt("lastYear"));
+        if(this.getArguments() != null) {
+            firstYearPicker.setValue(this.getArguments().getInt("firstYear"));
+            lastYearPicker.setValue(this.getArguments().getInt("lastYear"));
+        }
 
 
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {

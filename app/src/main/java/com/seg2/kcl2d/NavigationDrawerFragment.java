@@ -123,17 +123,6 @@ public class NavigationDrawerFragment extends Fragment implements SearchView.OnQ
 
             }
         });
-        /*
-        mDrawerListView.setAdapter(new ArrayAdapter<String>(
-                getActionBar().getThemedContext(),
-                android.R.layout.simple_list_item_activated_1,
-                android.R.id.text1,
-                new String[]{
-                        getString(R.string.title_section1),
-                        getString(R.string.title_section2),
-                        getString(R.string.title_section3),
-                }));
-        */
 
         countryList.clear();
         CountryData.loadCountries(this.getActivity().getApplicationContext());
@@ -173,7 +162,6 @@ public class NavigationDrawerFragment extends Fragment implements SearchView.OnQ
             sv.setOnQueryTextListener(this);
             sv.setIconifiedByDefault(true);
             TextView textView = (TextView) sv.findViewById(id);
-            //textView.setTextColor(Color.WHITE);
             if(searchViews == 0){
                 searchViews++;
             }
@@ -340,11 +328,6 @@ public class NavigationDrawerFragment extends Fragment implements SearchView.OnQ
         if (mDrawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
-
-        /*if (item.getItemId() == R.id.action_example) {
-            Toast.makeText(getActivity(), "Example action.", Toast.LENGTH_SHORT).show();
-            return true;
-        }*/
 
         return super.onOptionsItemSelected(item);
     }

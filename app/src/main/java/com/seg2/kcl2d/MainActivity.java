@@ -87,15 +87,11 @@ public class MainActivity extends Activity implements NavigationDrawerFragment.N
      */
     private Country mCountry;
 
-    /**
-     * The graph that the data is added to
-     */
-    private LineChartView chart;
     private HashMap<String, IndicatorClass> populationByDate = new HashMap<String, IndicatorClass>();
     private HashMap<String, IndicatorClass> indicatorByDate = new HashMap<String, IndicatorClass>();
     /**
      * Toast that shows when a point is selected
-     */
+    */
     private Toast infoToast;
 
 
@@ -180,17 +176,7 @@ public class MainActivity extends Activity implements NavigationDrawerFragment.N
     }
 
     public void onSectionAttached(int number) {
-        /*switch (number) {
-            case 1:
-                mTitle = getString(R.string.title_section1);
-                break;
-            case 2:
-                mTitle = getString(R.string.title_section2);
-                break;
-            case 3:
-                mTitle = getString(R.string.title_section3);
-                break;
-        }*/
+
         mCountry = CountryData.getCountry(number - 1);
 
         DownloadJson dj = new DownloadJson();
@@ -266,10 +252,8 @@ public class MainActivity extends Activity implements NavigationDrawerFragment.N
 
     @Override
     public void onDialogPositiveClick(DialogFragment dialog, String firstYear, String lastYear) {
-        /*this.firstYear = firstYear;
+        this.firstYear = firstYear;
         this.lastYear = lastYear;
-
-        new DownloadJson().execute();*/
 
         setUpGraph(Integer.parseInt(firstYear), Integer.parseInt(lastYear));
     }
@@ -343,46 +327,7 @@ public class MainActivity extends Activity implements NavigationDrawerFragment.N
         }
     }
 
-    /*
-    public void setUpGraph() {
-        chart = (LineChartView) findViewById(R.id.country_detail);
-        //chart.setValueSelectionEnabled(true);
-        LineChartData data = new LineChartData();
 
-        data.setAxisXBottom(new Axis());
-        data.setAxisYLeft(new Axis().setHasLines(true));
-
-        List<PointValue> values = new ArrayList<PointValue>();
-
-        for (int i = 0; i < population.length; i++) {
-            Indicator populationData = population[i];
-            int populationYear = Integer.parseInt(populationData.getDate());
-            int populationValue = Integer.parseInt(populationData.getValue());
-
-            values.add(new PointValue(populationYear, populationValue));
-        }
-
-        List<Line> lines = new ArrayList<Line>();
-        Line line = new Line(values).setColor(Color.argb(255, 48, 170, 211));
-        line.setHasLabelsOnlyForSelected(true);
-        lines.add(line);
-
-        data.setLines(lines);
-
-        chart.setLineChartData(data);
-    }
-    */
-
-    private float getMaxViewportValue(float yMax, float yMin){
-        float range = yMax - yMin;
-        return yMax + (0.15f * range);
-    }
-
-    private float getMinViewPortValue(float yMin, float yMax){
-        float range = yMax - yMin;
-        return 0.5f * yMax;
-
-    }
     private void setViewport(Chart chart, float yMax, float yMin) {
         Viewport v = new Viewport(chart.getMaximumViewport());
         float range = yMax - yMin;
@@ -406,7 +351,7 @@ public class MainActivity extends Activity implements NavigationDrawerFragment.N
     private void setUpGraph(int startDate, int endDate) {
 
         final HashMap<PointValue, Float> originalIndicatorVals = new HashMap<PointValue, Float>();
-        final LineChartView chart = (LineChartView) findViewById(R.id.country_detail1);
+        final LineChartView chart = (LineChartView) findViewById(R.id.country_detail);
         LineChartData data;
         Line line;
         List<PointValue> values;
@@ -425,27 +370,11 @@ public class MainActivity extends Activity implements NavigationDrawerFragment.N
                     float populationValueFloat = Float.parseFloat(populationValue);
                     float populationYearFloat = Float.parseFloat(populationYear);
 
-                    //float scalePopulation = GraphHelper.scaleValues(indicatorMax, indicatorMin, popMax, popMin, populationValueFloat);
                     PointValue pv = new PointValue(populationYearFloat, populationValueFloat);
                     values.add(pv);
-                    //originalPopulations.put(pv, populationValue);
                 }
             }
         }
-        /*for (int i = 0; i < populationByDate.; i++) {
-            String populationValue = population[i].getValue();
-            String populationYear = population[i].getDate();
-
-            float populationValueFloat = Float.parseFloat(populationValue);
-            float populationYearFloat = Float.parseFloat(populationYear);
-
-            float scalePopulation = GraphHelper.scaleValues(indicatorMax, indicatorMin, popMax, popMin, populationValueFloat);
-            PointValue pv = new PointValue(populationYearFloat, populationValueFloat);
-            values.add(pv);
-            originalPopulations.put(pv, populationValue);
-
-
-        }*/
 
         line = new Line(values);
         line.setColor(Color.parseColor("#0C9D58"));
@@ -453,15 +382,6 @@ public class MainActivity extends Activity implements NavigationDrawerFragment.N
         lines.add(line);
 
         values = new ArrayList<PointValue>();
-
-        /*for (int i = 0; i < indicator.length; i++) {
-            if(indicator[i].getValue() != null) {
-                float healthValue = Float.parseFloat(indicator[i].getValue());
-                float healthYear = Float.parseFloat(indicator[i].getDate());
-                //float highestValue = getMaxViewportValue(popMax,popMin);
-                values.add(new PointValue(healthYear,GraphHelper.scaleValues(popMax, popMin, indicatorMax, indicatorMin, healthValue)));
-            }
-        }*/
 
         for(int i = startDate; i < endDate; i++){
 
@@ -505,12 +425,10 @@ public class MainActivity extends Activity implements NavigationDrawerFragment.N
         Axis rightYAxis = new Axis();
         rightYAxis.setName("Population");
         rightYAxis.setTextColor(Color.parseColor("#CC0000"));
-        //rightYAxis.setFormatter(new HeightValueFormatter(0, null, null));
         rightYAxis.setMaxLabelChars(10);
         data.setAxisYRight(rightYAxis);
 
         chart.setLineChartData(data);
-        //setViewport(chart, popMax, popMin);
         chart.setOnValueTouchListener(new LineChartView.LineChartOnValueTouchListener() {
             DecimalFormat df = new DecimalFormat("#.##");
 
@@ -544,13 +462,8 @@ public class MainActivity extends Activity implements NavigationDrawerFragment.N
             @Override
             public boolean onLongClick(View v) {
                 if(isScaled){
-                    Viewport viewport = chart.getCurrentViewport();
                     chart.resetViewports();
 
-                    /*viewport.bottom = popMin;
-                    viewport.top = popMax;
-                    chart.setMaximumViewport(viewport);
-                    chart.setCurrentViewport(viewport, false);*/
                     isScaled = false;
                 }else{
                     setViewport(chart, popMax, popMin);
@@ -559,44 +472,6 @@ public class MainActivity extends Activity implements NavigationDrawerFragment.N
                 return true;
             }
         });
-
-    /*
-        Viewport v = chart.getMaximumViewport();
-        v.set(v.left, healthPercentRange, v.right, 0);
-        chart.setMaximumViewport(v);
-        chart.setCurrentViewport(v, false);
-        */
-
-        /*LineChartView chart2 = (LineChartView) findViewById(R.id.country_detail2);
-        chart2.setVisibility(View.VISIBLE);
-        //chart1.setVisibility(View.INVISIBLE);
-        LineChartData data2;
-        Line line2;
-        List<PointValue> values2;
-        List<Line> lines2 = new ArrayList<Line>();
-
-        values2 = new ArrayList<PointValue>();
-
-        for (int i = 0; i < indicator.length; i++) {
-            if(indicator[i].getValue() != null) {
-                float healthValue = Float.parseFloat(indicator[i].getValue());
-                float healthYear = Float.parseFloat(indicator[i].getDate());
-
-                values2.add(new PointValue(healthYear, healthValue));
-            }
-        }
-
-        line2 = new Line(values2);
-        line2.setColor(Color.parseColor("#0099CC"));
-        line2.setHasPoints(true);
-        lines2.add(line2);
-
-        data2 = new LineChartData(lines2);
-
-
-
-        chart2.setLineChartData(data2);
-        setViewport(chart2, indicatorMax, indicatorMin);*/
     }
 
     private static class HeightValueFormatter extends SimpleValueFormatter {
@@ -642,7 +517,7 @@ public class MainActivity extends Activity implements NavigationDrawerFragment.N
 
             StringBuilder builder = new StringBuilder();
 
-            url = "http://api.worldbank.org/countries/"+ mCountry.getId() +"/indicators/SP.POP.TOTL?date=" + firstYear + ":" + lastYear + "&format=json";
+            url = "http://api.worldbank.org/countries/"+ mCountry.getId() +"/indicators/SP.POP.TOTL?date=1960:2010&format=json";
 
             HttpClient client = new DefaultHttpClient();
             HttpGet httpGet = new HttpGet(url);
@@ -680,8 +555,7 @@ public class MainActivity extends Activity implements NavigationDrawerFragment.N
 
             StringBuilder builderIndicator = new StringBuilder();
 
-            url = "http://api.worldbank.org/countries/"+ mCountry.getId() +"/indicators/"+ indicatorString +"?date=" + firstYear + ":" +
-                    lastYear + "&format=json";
+            url = "http://api.worldbank.org/countries/"+ mCountry.getId() +"/indicators/"+ indicatorString +"?date=1960:2010&format=json";
 
             HttpClient clientIndicator = new DefaultHttpClient();
             HttpGet httpGetIndicator = new HttpGet(url);
@@ -779,35 +653,6 @@ public class MainActivity extends Activity implements NavigationDrawerFragment.N
         }
     };
 
-    /*protected void createNetErrorDialog() {
-
-        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("You need a network connection to use this application. Please turn on mobile network or Wi-Fi in Settings.")
-                .setTitle("Unable to connect")
-                .setCancelable(false)
-                .setPositiveButton("Settings",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                Intent i = new Intent(Settings.ACTION_WIFI_SETTINGS);
-                                startActivity(i);
-                            }
-                        }
-                )
-                .setNegativeButton("Cancel",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                if(isConnected()) {
-                                    dialog.dismiss();
-                                }else{
-                                    finish();
-                                }
-                            }
-                        }
-                );
-        AlertDialog alert = builder.create();
-        alert.show();
-    }*/
-
     protected void createNetErrorDialog() {
 
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -824,7 +669,6 @@ public class MainActivity extends Activity implements NavigationDrawerFragment.N
         AlertDialog alert = builder.create();
         alert.show();
     }
-
 
     private boolean isConnected(){
         ConnectivityManager cm =
