@@ -11,10 +11,8 @@
             android:src="@drawable/pop_dat"
             android:layout_gravity="center_horizontal|top"/>
     <TextView
-            android:layout_width="match_parent"
+            android:layout_width="500dp"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="50dp"
-            android:layout_marginRight="50dp"
             android:text="@string/home_screen_content"
             android:id="@+id/textView" android:layout_gravity="center" android:textSize="30dp"/>
     <Button

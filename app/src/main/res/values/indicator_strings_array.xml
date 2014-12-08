@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="indicator_string_array">
-        <item>SP.DYN.LE00.IN</item>
-        <item>EN.ATM.CO2E.PC</item>
-        <item>NY.GDP.MKTP.CD</item>
+        <item>SP.DYN.LE00.MA.IN</item>
+        <item>SP.DYN.LE00.FE.IN</item>
+        <item>SH.DYN.MORT</item>
+        <item>SP.ADO.TFRT</item>
+        <item>SP.DYN.CDRT.IN</item>
+        <item>SP.URB.TOTL.IN.ZS</item>
+        <item>EN.ATM.CO2E.KT</item>
+        <item>NY.GDP.PCAP.CD</item>
+        <item>GC.TAX.TOTL.GD.ZS</item>
+        <item>EG.USE.ELEC.KH.PC</item>
     </string-array>
 </resources>

@@ -10,12 +10,25 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         tools:context="com.worldbankapp_seg_2d.app.CountryDetailFragment"
-        android:id="@+id/country_detail"
+        android:id="@+id/country_detail1"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingTop="30dp"
         android:textIsSelectable="true"
         android:layout_alignParentStart="true" />
+
+    <lecho.lib.hellocharts.view.LineChartView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        tools:context="com.worldbankapp_seg_2d.app.CountryDetailFragment"
+        android:id="@+id/country_detail2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:paddingTop="30dp"
+        android:textIsSelectable="true"
+        android:layout_alignParentStart="true"
+        android:visibility="gone"/>
 
     <TextView
         android:layout_width="wrap_content"
@@ -23,9 +36,9 @@
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text=""
         android:id="@+id/country_name"
-        android:layout_alignTop="@+id/country_detail"
+        android:layout_alignTop="@+id/country_detail1"
         android:layout_alignParentStart="true"
-        android:layout_alignEnd="@+id/country_detail"
+        android:layout_alignEnd="@+id/country_detail1"
         android:gravity="center_horizontal"
         android:autoText="false" />
 

@@ -29,13 +29,15 @@ public class SelectYearsDialog extends DialogFragment {
 
         final NumberPicker firstYearPicker = (NumberPicker) view.findViewById(R.id.start_year);
         setUpNumberPicker(firstYearPicker);
-
+        firstYearPicker.setMinValue(1960);
         final NumberPicker lastYearPicker = (NumberPicker) view.findViewById(R.id.end_year);
+        lastYearPicker.setMinValue(1970);
         setUpNumberPicker(lastYearPicker);
 
         // Set default values to the previously selected ones
         firstYearPicker.setValue(this.getArguments().getInt("firstYear"));
         lastYearPicker.setValue(this.getArguments().getInt("lastYear"));
+
 
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
@@ -51,7 +53,7 @@ public class SelectYearsDialog extends DialogFragment {
                 firstYear = Integer.valueOf(firstYearValue).toString();
                 lastYear = Integer.valueOf(secondYearValue).toString();
 
-                if (firstYearValue >= secondYearValue){
+                if (secondYearValue - firstYearValue < 10){
                     createSelectionErrorDialog();
                 } else {
                     mListener.onDialogPositiveClick(SelectYearsDialog.this, firstYear, lastYear);
@@ -79,14 +81,13 @@ public class SelectYearsDialog extends DialogFragment {
 
     private void setUpNumberPicker(NumberPicker picker){
         picker.setMaxValue(2010);
-        picker.setMinValue(1960);
         picker.setWrapSelectorWheel(true);
         picker.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
     }
 
     private void createSelectionErrorDialog() {
         final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setMessage("Final year cannot be less than or equal to first year. Please select again.")
+        builder.setMessage("Please select a range of at least 10 years.")
                 .setTitle("Selection Error")
                 .setCancelable(false)
                 .setNegativeButton(R.string.ok,

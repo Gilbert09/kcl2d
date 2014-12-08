@@ -1,8 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="spinner_array">
-        <item>Life Expectancy From Birth (total)</item>
-        <item>CO2 Emissions (metric tons per capita)</item>
-        <item>GDP (current USD)</item>
+        <item>Life Expectancy From Birth (males)</item>
+        <item>Life Expectancy From Birth (females)</item>
+        <item>Mortality rate, under-5 (per 1,000 live births)</item>
+        <item>Adolescent fertility rate (births per 1,000 women ages 15-19)</item>
+        <item>Death rate, crude (per 1,000 people)</item>
+        <item>Urban population (% of total)</item>
+        <item>CO2 Emissions(metric tons per capita)</item>
+        <item>GDP per capita (current US$)</item>
+        <item>Tax revenue (% of GDP)</item>
+        <item>Electric power consumption (kWh per capita)</item>
+
     </string-array>
 </resources>
