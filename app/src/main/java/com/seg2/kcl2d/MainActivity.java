@@ -379,7 +379,7 @@ public class MainActivity extends Activity implements NavigationDrawerFragment.N
         line = new Line(values);
         line.setColor(Color.parseColor("#0C9D58"));
         line.setHasPoints(true);
-        line.setPointRadius(4);
+        line.setPointRadius(3);
         lines.add(line);
 
         values = new ArrayList<PointValue>();
@@ -401,7 +401,7 @@ public class MainActivity extends Activity implements NavigationDrawerFragment.N
 
         line = new Line(values);
         line.setColor(Color.parseColor("#53A0FD"));
-        line.setPointRadius(5);
+        line.setPointRadius(3);
         lines.add(line);
 
         data = new LineChartData(lines);
@@ -426,7 +426,7 @@ public class MainActivity extends Activity implements NavigationDrawerFragment.N
         // Right Y Axis
         Axis rightYAxis = new Axis();
         rightYAxis.setName("Population");
-        rightYAxis.setTextColor(Color.parseColor("#CC0000"));
+        rightYAxis.setTextColor(Color.parseColor("#0C9D58"));
         rightYAxis.setMaxLabelChars(10);
         data.setAxisYRight(rightYAxis);
 
